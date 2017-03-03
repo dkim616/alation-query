@@ -12,9 +12,7 @@ class TrieNode(object):
 		self.next = next
 		self.names = names
 	
-	def add_name(self, name, redis):
-		score = int(redis.get(name))
-
+	def add_name(self, name, score, redis):
 		if (score, name) in self.names:
 			return
 
@@ -34,11 +32,12 @@ class PairTrie(object):
 		self.root = root
 
 	def add_pair(self, pair, redis):
-		redis.set(pair.name, pair.score)
-
 		keys = pair.name.split('_')
 		if len(keys) > 1:
 			keys.append(pair.name)
+
+		name = pair.name
+		score = int(pair.score)
 
 		for key in keys:
 			current = self.root
@@ -47,7 +46,7 @@ class PairTrie(object):
 				if letter not in current.next:
 					current.next[letter] = TrieNode(letter)
 				current = current.next[letter]
-				current.add_name(pair.name, redis)
+				current.add_name(name, score, redis)
 
 	def print_trie(self):
 		current = self.root

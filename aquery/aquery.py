@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config.from_envvar('AQUERY_SETTINGS', silent=True)
 
 def decode_pairs():
-	with app.open_resource('data/test.json', 'r') as f:
+	with app.open_resource('data/test2.json', 'r') as f:
 		decoded = json.JSONDecoder(object_hook=from_json).decode(f.read())
 	return decoded
 
@@ -38,12 +38,17 @@ def init_trie():
 	print 'Flushing DB'
 	r.flushdb()
 
+	print 'Adding pairs'
 	for pair in pairs:
+		if not r.get(pair.name):
+			r.set(pair.name, pair.score)
 		trie.add_pair(pair, r)
 
+	print 'Adding trie to redis'
 	p = trie.get_pickle()
 	r.set('trie', p)
 
+	print 'Saving redis data in background'
 	r.bgsave()
 
 @app.cli.command('init')
