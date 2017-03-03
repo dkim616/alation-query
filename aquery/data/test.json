@@ -1,1 +1,1 @@
-[{"keys": ["revenue"], "score": "10000", "name": "revenue"}, {"keys": ["yearly", "revenue"], "score": "1000", "name": "yearly_revenue"}, {"keys": ["quartly", "revenue"], "score": "500", "name": "quartly_revenue"}, {"keys": ["half", "year"], "score": "200", "name": "half_year"}, {"keys": ["first", "quarter"], "score": "100", "name": "first_quarter"}, {"keys": ["years"], "score": "6", "name": "years"}]
+{"yearly_revenue": "1000", "revenue": "10000", "years": "6", "quartly_revenue": "500", "half_year": "200", "first_quarter": "100"}

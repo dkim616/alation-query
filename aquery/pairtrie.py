@@ -12,13 +12,13 @@ class TrieNode(object):
 		self.next = next
 		self.names = names
 	
-	def add_name(self, name, score, redis):
+	def add_name(self, name, score):
 		if (score, name) in self.names:
 			return
 
 		if len(self.names) == 10:
 			top = self.names[0]
-			top_score = redis.get(self.names[0])
+			top_score = top[0]
 			if score < top_score or score == top_score and name < self.names[0]:
 				heapq.heappop(self.names)
 				heapq.heappush(self.names, (score, name))
@@ -31,13 +31,12 @@ class PairTrie(object):
 			root = TrieNode()
 		self.root = root
 
-	def add_pair(self, pair, redis):
-		keys = pair.name.split('_')
+	def add_pair(self, name, score):
+		keys = name.split('_')
 		if len(keys) > 1:
-			keys.append(pair.name)
+			keys.append(name)
 
-		name = pair.name
-		score = int(pair.score)
+		score = int(score)
 
 		for key in keys:
 			current = self.root
@@ -46,7 +45,7 @@ class PairTrie(object):
 				if letter not in current.next:
 					current.next[letter] = TrieNode(letter)
 				current = current.next[letter]
-				current.add_name(name, score, redis)
+				current.add_name(name, score)
 
 	def print_trie(self):
 		current = self.root

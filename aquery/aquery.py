@@ -12,7 +12,7 @@ app.config.from_envvar('AQUERY_SETTINGS', silent=True)
 
 def decode_pairs():
 	with app.open_resource('data/test2.json', 'r') as f:
-		decoded = json.JSONDecoder(object_hook=from_json).decode(f.read())
+		decoded = json.JSONDecoder().decode(f.read())
 	return decoded
 
 def get_redis():
@@ -39,13 +39,19 @@ def init_trie():
 	r.flushdb()
 
 	print 'Adding pairs'
-	for pair in pairs:
-		if not r.get(pair.name):
-			r.set(pair.name, pair.score)
-		trie.add_pair(pair, r)
+	count = 0
+	for name, score in pairs.iteritems():
+		# if not r.get(name):
+		# 	r.set(name, score)
+		trie.add_pair(name, score)
+		count += 1
+		if count % 10000 == 0:
+			print 'Added', count
+
+	print 'Pickling trie'
+	p = trie.get_pickle()
 
 	print 'Adding trie to redis'
-	p = trie.get_pickle()
 	r.set('trie', p)
 
 	print 'Saving redis data in background'
