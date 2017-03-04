@@ -25,28 +25,31 @@ def get_trie():
 	if not hasattr(g, 'trie'):
 		# trie = r.get('trie')
 		# if not trie:
-		g.trie = PairTrie(redis=r)
+		print 'New Trie'
+		g.trie = PairTrie(r)
 		# else:
 		# 	g.trie = PairTrie(pickle.loads(trie), redis=r)
 	return g.trie
 
 def init_trie():
 	r = get_redis()
-	pairs = decode_pairs()
-	trie = get_trie()
 
-	print 'Flushing DB'
-	r.flushdb()
+	# print 'Flushing DB'
+	# r.flushdb()
 
-	print 'Adding pairs'
-	count = 0
-	for name, score in pairs.iteritems():
-		# if not r.get(name):
-		# 	r.set(name, score)
-		trie.add_pair(name, score)
-		count += 1
-		if count % 10000 == 0:
-			print 'Added', count
+	if not r.hgetall('0:'):
+		pairs = decode_pairs()
+		trie = get_trie()
+
+		print 'Adding pairs'
+		count = 0
+		for name, score in pairs.iteritems():
+			# if not r.get(name):
+			# 	r.set(name, score)
+			trie.add_pair(name, score)
+			count += 1
+			if count % 10000 == 0:
+				print 'Added', count
 
 	# print 'Pickling trie'
 	# p = trie.get_pickle()
@@ -54,8 +57,8 @@ def init_trie():
 	# print 'Adding trie to redis'
 	# r.set('trie', p)
 
-	# print 'Saving redis data in background'
-	# r.bgsave()
+	print 'Saving redis data in background'
+	r.bgsave()
 
 # @app.cli.command('init')
 def init_command():
@@ -81,5 +84,4 @@ def query(prefix):
 if __name__ == '__main__':
 	with app.app_context():
 		init_command()
-		print hasattr(g, 'trie')
 		app.run(use_reloader=False)
