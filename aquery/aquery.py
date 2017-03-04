@@ -4,7 +4,7 @@ import json
 
 from pairtrie import PairTrie
 from pair import Pair, from_json
-from flask import Flask, g
+from flask import Flask, g, current_app
 
 app = Flask(__name__)
 
@@ -12,7 +12,7 @@ app.config.from_envvar('AQUERY_SETTINGS', silent=True)
 
 def decode_pairs():
 	with app.open_resource('data/test2.json', 'r') as f:
-		decoded = json.JSONDecoder().decode(f.read())
+		decoded = json.loads(f.read())
 	return decoded
 
 def get_redis():
@@ -23,11 +23,11 @@ def get_redis():
 def get_trie():
 	r = get_redis()
 	if not hasattr(g, 'trie'):
-		trie = r.get('trie')
-		if not trie:
-			g.trie = PairTrie()
-		else:
-			g.trie = PairTrie(pickle.loads(trie))
+		# trie = r.get('trie')
+		# if not trie:
+		g.trie = PairTrie(redis=r)
+		# else:
+		# 	g.trie = PairTrie(pickle.loads(trie), redis=r)
 	return g.trie
 
 def init_trie():
@@ -48,16 +48,16 @@ def init_trie():
 		if count % 10000 == 0:
 			print 'Added', count
 
-	print 'Pickling trie'
-	p = trie.get_pickle()
+	# print 'Pickling trie'
+	# p = trie.get_pickle()
 
-	print 'Adding trie to redis'
-	r.set('trie', p)
+	# print 'Adding trie to redis'
+	# r.set('trie', p)
 
-	print 'Saving redis data in background'
-	r.bgsave()
+	# print 'Saving redis data in background'
+	# r.bgsave()
 
-@app.cli.command('init')
+# @app.cli.command('init')
 def init_command():
 	init_trie()
 	print('Initialized data.')
@@ -77,3 +77,9 @@ def query(prefix):
 	r = get_redis()
 	trie = get_trie()
 	return json.dumps(trie.query(prefix, r))
+
+if __name__ == '__main__':
+	with app.app_context():
+		init_command()
+		print hasattr(g, 'trie')
+		app.run(use_reloader=False)

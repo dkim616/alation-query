@@ -2,15 +2,11 @@ import pickle
 import heapq
 
 class TrieNode(object):
-	def __init__(self, letter=None, next=None, names=None):
-		if next == None:
-			next = {}
-		if names == None:
-			names = []
+	def __init__(self, letter=None):
 
 		self.letter = letter
-		self.next = next
-		self.names = names
+		self.next = {}
+		self.names = []
 	
 	def add_name(self, name, score):
 		if (score, name) in self.names:
@@ -26,10 +22,11 @@ class TrieNode(object):
 			heapq.heappush(self.names, (score, name))
 
 class PairTrie(object):
-	def __init__(self, root=None):
+	def __init__(self, root=None, redis=None):
 		if root == None:
-			root = TrieNode()
+			root = TrieNode('0:')
 		self.root = root
+		self.r = redis
 
 	def add_pair(self, name, score):
 		keys = name.split('_')
@@ -46,6 +43,9 @@ class PairTrie(object):
 					current.next[letter] = TrieNode(letter)
 				current = current.next[letter]
 				current.add_name(name, score)
+
+	def createNode(self, key):
+		pass
 
 	def print_trie(self):
 		current = self.root
