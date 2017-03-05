@@ -1,4 +1,3 @@
-import pickle
 import heapq
 
 class TrieNode(object):
@@ -14,19 +13,17 @@ class TrieNode(object):
 
 		if len(self.names) == 10:
 			top = self.names[0]
+			top_name = top[1]
 			top_score = top[0]
-			if score < top_score or score == top_score and name < self.names[0]:
+			if score > top_score or (score == top_score and name < top_name):
 				heapq.heappop(self.names)
 				heapq.heappush(self.names, (score, name))
 		else:
 			heapq.heappush(self.names, (score, name))
 
 class PairTrie(object):
-	def __init__(self, root=None, redis=None):
-		if root == None:
-			root = TrieNode('0:')
-		self.root = root
-		self.r = redis
+	def __init__(self):
+		self.root = TrieNode()
 
 	def add_pair(self, name, score):
 		keys = name.split('_')
@@ -44,20 +41,10 @@ class PairTrie(object):
 				current = current.next[letter]
 				current.add_name(name, score)
 
-	def createNode(self, key):
+	def print_trie(self):
 		pass
 
-	def print_trie(self):
-		current = self.root
-
-		def dfs(node, level):
-			for letter in node.next:
-				print letter, level
-				dfs(node.next[letter], level+1)
-
-		dfs(current, 0)
-
-	def query(self, prefix, redis):
+	def query(self, prefix):
 		current = self.root
 
 		for letter in prefix:
@@ -73,6 +60,3 @@ class PairTrie(object):
 
 		results = [[name, score] for score, name in results]
 		return list(reversed(results))
-	
-	def get_pickle(self):
-		return pickle.dumps(self.root)
